@@ -2,6 +2,7 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::net::ToSocketAddrs;
 use warp::{http::Method, Filter};
+use warp::http::Uri;
 
 // Define the structure to hold SSL certificate details
 #[derive(Serialize, Deserialize)]
@@ -22,8 +23,7 @@ async fn main() {
     // Define the CORS filter to allow requests from localhost:3000
     let cors = warp::cors()
         .allow_origin("http://localhost:3000") // Allow requests from localhost:3000
-        .allow_methods(&[Method::GET]);         // Allow only GET requests
-        // .allow_headers(vec!["content-type"]);  // Allow content-type header
+        .allow_methods(vec![Method::GET]);     // Allow only GET requests
 
     // Define the API route for SSL certificate checks
     let ssl_route = warp::path!("ssl" / String)
@@ -60,13 +60,16 @@ async fn fetch_ssl_certificate(domain: &str) -> Result<CertificateDetails, Box<d
     // Create a client that can bypass SSL certificate errors
     let client = Client::builder().danger_accept_invalid_certs(true).build()?;
 
-    // Format the domain as a URL
+    // Format the domain as a URL (ensure it starts with https://)
     let url = format!("https://{}", domain);
     println!("Formatted URL: {}", url);
 
     // Send an HTTPS request to the domain
-    let _response = client.get(&url).send().await?;
+    let response = client.get(&url).send().await?;
     println!("Sent HTTPS request to domain: {}", domain);
+    if !response.status().is_success() {
+        return Err(format!("Failed to fetch certificate. Status: {}", response.status()).into());
+    }
 
     // Resolve the domain into a socket address (used to extract SSL certificate)
     let socket_addr = format!("{}:443", domain).to_socket_addrs()?.next().unwrap();

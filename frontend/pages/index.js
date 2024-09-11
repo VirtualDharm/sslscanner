@@ -8,8 +8,12 @@ export default function Home() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Remove http:// or https:// from the input domain, if present
+    let cleanedDomain = domain.replace(/(^\w+:|^)\/\//, "");
+
     try {
-      const res = await axios.get(`http://localhost:3030/ssl/${domain}`);
+      const res = await axios.get(`http://localhost:3030/ssl/${cleanedDomain}`);
       setCertDetails(res.data);
       setError(null);
     } catch (err) {
@@ -24,7 +28,7 @@ export default function Home() {
       <form onSubmit={handleSubmit}>
         <input
           type="text"
-          placeholder="Enter domain"
+          placeholder="Enter domain (e.g., www.example.com)"
           value={domain}
           onChange={(e) => setDomain(e.target.value)}
         />
