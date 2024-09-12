@@ -23,7 +23,7 @@ export default function Home() {
   };
 
   return (
-    <div>
+    <div className="container">
       <h1>SSL Certificate Checker</h1>
       <form onSubmit={handleSubmit}>
         <input
@@ -35,9 +35,10 @@ export default function Home() {
         <button type="submit">Check</button>
       </form>
 
-      {error && <p>{error}</p>}
+      {error && <p className="error">{error}</p>}
+
       {certDetails && (
-        <div>
+        <div className="cert-details">
           <h2>Certificate Details</h2>
           <p><strong>Validity Status:</strong> {certDetails.validity_status ? "Valid" : "Invalid"}</p>
           <p><strong>Expiration Date:</strong> {certDetails.expiration_date}</p>
